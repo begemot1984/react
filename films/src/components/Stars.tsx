@@ -2,15 +2,16 @@ import { type FC } from "react";
 import Star from "./Star";
 
 type StarsProps = {
-  count: number;
+  count?: number;
 };
 
 export const Stars: FC<StarsProps> = ({ count }) => {
-  if (count >= 1 && count <= 5) {
+  const countReal = count ?? 0;
+  if (countReal >= 1 && countReal <= 5) {
     const items = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < countReal; i++) {
       items.push(
-        <li>
+        <li key={`Star${i}`}>
           <Star />
         </li>
       );

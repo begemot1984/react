@@ -4,6 +4,7 @@ import { Stars } from "./components/Stars";
 function App() {
   return (
     <>
+      <Stars />
       <Stars count={0} />
       <Stars count={1} />
       <Stars count={2} />

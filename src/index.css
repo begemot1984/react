@@ -1,0 +1,23 @@
+.post-card {
+  margin-top: 10px;
+  padding: 5px;
+  background-color: aquamarine;
+}
+
+.post-card:hover {
+  margin-top: 10px;
+  padding: 5px;
+  background-color: aqua;
+}
+
+p {
+  margin: 5px;
+}
+
+label {
+  margin-right: 10px;
+}
+
+button {
+  margin-right: 10px;
+}

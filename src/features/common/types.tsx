@@ -27,3 +27,8 @@ export type CatalogItem = {
   price: number;
   images: string[];
 };
+
+export type Category = {
+  id: number;
+  title: string;
+};

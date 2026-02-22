@@ -21,3 +21,7 @@ export const PAGE_ITEM = (id: string | number) => `/catalog/${id}.html`;
 export const PAGE_ABOUT = "/about.html";
 export const PAGE_CONTACTS = "/contacts.html";
 export const PAGE_CART = "/cart.html";
+
+export const CATEGORY_ID_ALL = -1;
+
+export const GOODS_BATCH_SIZE = 6;

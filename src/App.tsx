@@ -35,7 +35,10 @@ export default function App() {
             <Routes>
               <Route path={PAGE_INDEX} element={<Index />} />
               <Route path={PAGE_ITEM(":id")} element={<Item />} />
-              <Route path={PAGE_CATALOG} element={<Catalog search={true} />} />
+              <Route
+                path={PAGE_CATALOG}
+                element={<Catalog isStandalone={true} />}
+              />
               <Route path={PAGE_ABOUT} element={<About />} />
               <Route path={PAGE_CONTACTS} element={<Contacts />} />
               <Route path={PAGE_CART} element={<Cart />} />

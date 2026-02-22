@@ -17,31 +17,23 @@ export const headerSlice = createSlice({
   name: "header",
   initialState: initState,
   reducers: {
-    setSearchExpanderVisible: (state, action: PayloadAction<boolean>) => {
-      state.isSearchExpanderVisible = action.payload;
+    toggleSearchExpanderVisible: (state) => {
+      state.isSearchExpanderVisible = !state.isSearchExpanderVisible;
+      state.headerSearchQuery = "";
     },
     setActiveMenuItem: (state, action: PayloadAction<string>) => {
       state.activeMenuItem = action.payload;
     },
-    resetActiveMenuItem: (state) => {
-      state.activeMenuItem = "";
-    },
     setHeaderSearchQuery: (state, action: PayloadAction<string>) => {
       state.headerSearchQuery = action.payload;
-    },
-    resetHeaderSearchQuery: (state) => {
-      state.isSearchExpanderVisible = false;
-      state.headerSearchQuery = "";
     },
   },
 });
 
 export const {
-  setSearchExpanderVisible,
+  toggleSearchExpanderVisible,
   setActiveMenuItem,
-  resetActiveMenuItem,
   setHeaderSearchQuery,
-  resetHeaderSearchQuery,
 } = headerSlice.actions;
 
 export const headerReducer = headerSlice.reducer;

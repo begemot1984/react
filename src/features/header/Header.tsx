@@ -1,13 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  setSearchExpanderVisible,
+  toggleSearchExpanderVisible,
   setHeaderSearchQuery,
-  resetHeaderSearchQuery,
 } from "./headerSlice";
-import { useEffect, useRef, type FormEvent } from "react";
+import { useEffect, useRef, type ChangeEvent, type FormEvent } from "react";
 import { createSelector } from "@reduxjs/toolkit";
 import {
+  CATEGORY_ID_ALL,
   MENU_ITEM_ABOUT,
   MENU_ITEM_CATALOG,
   MENU_ITEM_CONTACTS,
@@ -17,12 +17,8 @@ import {
   PAGE_CATALOG,
   PAGE_CONTACTS,
   PAGE_INDEX,
-  PARAM_QUERY,
 } from "../common/constants";
-import {
-  loadCatalogAsync,
-  setCatalogSearchQuery,
-} from "../catalog/catalogSlice";
+import { setCatalogLoadParams } from "../catalog/catalogSlice";
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -43,24 +39,32 @@ export default function Header() {
     }
   }, [state.isSearchExpanderVisible]);
 
-  const searchFormSubmit = (evt: FormEvent<HTMLFormElement>) => {
+  const onSearchSubmit = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
-    searchClick();
+    onSearchClick();
   };
-  const searchClick = () => {
+  const onSearchClick = () => {
     if (
       state.isSearchExpanderVisible &&
       state.headerSearchQuery.trim() !== ""
     ) {
-      dispatch(resetHeaderSearchQuery());
-      dispatch(setCatalogSearchQuery(state.headerSearchQuery));
-      loadCatalogAsync(
-        new URLSearchParams([[PARAM_QUERY, state.headerSearchQuery]]),
+      dispatch(
+        setCatalogLoadParams({
+          query: state.headerSearchQuery,
+          category: CATEGORY_ID_ALL,
+          offset: 0,
+          resetItems: true,
+        }),
       );
+      dispatch(toggleSearchExpanderVisible());
       navigate(PAGE_CATALOG);
     } else {
-      dispatch(setSearchExpanderVisible(!state.isSearchExpanderVisible));
+      dispatch(toggleSearchExpanderVisible());
     }
+  };
+
+  const onChangeCurrentSearchQuery = (evt: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setHeaderSearchQuery(evt.target.value));
   };
 
   return (
@@ -116,7 +120,7 @@ export default function Header() {
                     <div
                       data-id="search-expander"
                       className="header-controls-pic header-controls-search"
-                      onClick={searchClick}
+                      onClick={onSearchClick}
                     ></div>
                     <div
                       className="header-controls-pic header-controls-cart"
@@ -136,17 +140,15 @@ export default function Header() {
                       "header-controls-search-form form-inline" +
                       (state.isSearchExpanderVisible ? "" : " invisible")
                     }
-                    onSubmit={searchFormSubmit}
+                    onSubmit={onSearchSubmit}
                   >
                     <input
                       className="form-control"
                       placeholder="Поиск"
                       ref={searchInputRef}
                       value={state.headerSearchQuery}
-                      onChange={(evt) =>
-                        dispatch(setHeaderSearchQuery(evt.target.value))
-                      }
-                      onClick={searchClick}
+                      onChange={onChangeCurrentSearchQuery}
+                      onClick={onSearchClick}
                     />
                   </form>
                 </div>

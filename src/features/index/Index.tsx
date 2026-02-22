@@ -15,7 +15,7 @@ export default function Index() {
   return (
     <>
       <TopSales />
-      <Catalog search={false} />
+      <Catalog isStandalone={false} />
     </>
   );
 }

@@ -1,103 +1,146 @@
-import { useEffect, type FC } from "react";
+import { useEffect, type ChangeEvent, type FC, type FormEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setCatalogSearchQuery } from "./catalogSlice";
+import {
+  loadCatalogAsync,
+  loadCategoriesAsync,
+  setCatalogLoadParams,
+  setCurrentSearchQuery,
+} from "./catalogSlice";
 import { Link } from "react-router-dom";
-import { MENU_ITEM_CATALOG, PAGE_ITEM } from "../common/constants";
+import {
+  CATEGORY_ID_ALL,
+  MENU_ITEM_CATALOG,
+  PARAM_CATEGORY,
+  PARAM_OFFSET,
+  PARAM_QUERY,
+} from "../common/constants";
 import { setActiveMenuItem } from "../header/headerSlice";
 import Preloader from "../common/Preloader";
+import { ErrorMessage } from "../common/ErrorMessage";
+import { CatalogItems } from "../common/CatalogItems";
 
-export const Catalog: FC<CatalogProps> = ({ search }) => {
-  // TODO: dynamic menu and catalog
-  // TODO: use <Preloader /> while loading
-  // TODO: <Link> instead of <a> to avoid page reload
-  // TODO: search form preventDefault, start search
-  // TODO: load more (offset in url params)
-  // TODO: search by catalogId
+export const Catalog: FC<CatalogProps> = ({ isStandalone }) => {
   const dispatch = useAppDispatch();
   const state = useAppSelector((state) => state.catalog);
 
   useEffect(() => {
-    dispatch(setActiveMenuItem(MENU_ITEM_CATALOG));
+    if (isStandalone) {
+      dispatch(setActiveMenuItem(MENU_ITEM_CATALOG));
+    }
   });
+
+  useEffect(() => {
+    dispatch(loadCategoriesAsync());
+  }, [dispatch]);
+
+  // получить товары по текущему фильтру
+  useEffect(() => {
+    const params: string[][] = [];
+    if (state.loadParams.query.trim() !== "") {
+      params.push([PARAM_QUERY, state.loadParams.query]);
+    }
+    if (state.loadParams.category !== CATEGORY_ID_ALL) {
+      params.push([PARAM_CATEGORY, state.loadParams.category.toString()]);
+    }
+    if (state.loadParams.offset > 0) {
+      params.push([PARAM_OFFSET, state.loadParams.offset.toString()]);
+    }
+    dispatch(loadCatalogAsync(new URLSearchParams(params)));
+  }, [state.loadParams, dispatch]);
+
+  const onChangeCategory = (categoryId: number) => {
+    dispatch(
+      setCatalogLoadParams({
+        ...state.loadParams,
+        category: categoryId,
+        offset: 0,
+        resetItems: true,
+      }),
+    );
+  };
+
+  const onLoadMore = () => {
+    dispatch(
+      setCatalogLoadParams({
+        ...state.loadParams,
+        offset: state.goods.items.length,
+        resetItems: false,
+      }),
+    );
+  };
+
+  const onSearchSubmit = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    dispatch(
+      setCatalogLoadParams({
+        ...state.loadParams,
+        query: state.currentSearchQuery,
+        offset: 0,
+        resetItems: true,
+      }),
+    );
+  };
+
+  const onChangeCurrentSearchQuery = (evt: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setCurrentSearchQuery(evt.target.value));
+  };
 
   return (
     <>
       <section className="catalog">
         <h2 className="text-center">Каталог</h2>
-        {search && (
-          <form className="catalog-search-form form-inline">
+        {isStandalone && (
+          <form
+            className="catalog-search-form form-inline"
+            onSubmit={onSearchSubmit}
+          >
             <input
               className="form-control"
               placeholder="Поиск"
-              value={state.catalogSearchQuery}
-              onChange={(evt) =>
-                dispatch(setCatalogSearchQuery(evt.target.value))
-              }
+              value={state.currentSearchQuery}
+              onChange={onChangeCurrentSearchQuery}
             />
           </form>
         )}
+        {state.categories.errorMessage.trim() !== "" && (
+          <ErrorMessage msg={state.categories.errorMessage} />
+        )}
+        {state.categories.isLoading && <Preloader />}
         <ul className="catalog-categories nav justify-content-center">
-          <li className="nav-item">
-            <a className="nav-link active" href="#">
-              Все
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              Женская обувь
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              Мужская обувь
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              Обувь унисекс
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              Детская обувь
-            </a>
-          </li>
+          {state.categories.items.map((i) => {
+            return (
+              <li className="nav-item" key={i.id}>
+                <Link
+                  className={
+                    "nav-link" +
+                    (i.id === state.loadParams.category ? " active" : "")
+                  }
+                  to="#"
+                  onClick={() => onChangeCategory(i.id)}
+                >
+                  {i.title}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
-        <div className="row">
-          {state.errorMessage.trim() !== "" && <div>{state.errorMessage}</div>}
-          {state.isLoading && <Preloader />}
-          <div className="col-4">
-            {state.items.map((i) => {
-              return (
-                <div className="card catalog-item-card" key={i.id}>
-                  <img
-                    src={i.images[0]}
-                    className="card-img-top img-fluid"
-                    alt={i.title}
-                  />
-                  <div className="card-body">
-                    <p className="card-text">{i.title}</p>
-                    <p className="card-text">{i.price}</p>
-                    <Link
-                      to={PAGE_ITEM(i.id)}
-                      className="btn btn-outline-primary"
-                    >
-                      Заказать
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
+        {state.goods.errorMessage.trim() !== "" && (
+          <ErrorMessage msg={state.goods.errorMessage} />
+        )}
+        <CatalogItems items={state.goods.items} />
+        {state.goods.isLoading && <Preloader />}
+        {!state.goods.isLoading && state.isNextDataAvailable && (
+          <div className="text-center">
+            <button className="btn btn-outline-primary" onClick={onLoadMore}>
+              Загрузить ещё
+            </button>
           </div>
-        </div>
-        <div className="text-center">
-          <button className="btn btn-outline-primary">Загрузить ещё</button>
-        </div>
+        )}
       </section>
     </>
   );
 };
 
 type CatalogProps = {
-  search: boolean;
+  isStandalone: boolean;
 };

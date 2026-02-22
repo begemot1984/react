@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../../app/hooks";
-import { resetActiveMenuItem } from "../header/headerSlice";
+import { setActiveMenuItem } from "../header/headerSlice";
 
 export default function Cart() {
-  // TODO: dynamic cart content
+  // TODO: dynamic cart content (state + localStorage)
   // TODO: <Link to=""></Link> instead of <a href=""></a>
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(resetActiveMenuItem());
+    dispatch(setActiveMenuItem(""));
   });
 
   return (

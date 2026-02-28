@@ -32,3 +32,11 @@ export type Category = {
   id: number;
   title: string;
 };
+
+export type CartItem = {
+  id: number;
+  title: string;
+  size: string;
+  quantity: number;
+  price: number;
+};

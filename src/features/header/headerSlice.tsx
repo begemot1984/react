@@ -21,7 +21,7 @@ export const headerSlice = createSlice({
       state.isSearchExpanderVisible = !state.isSearchExpanderVisible;
       state.headerSearchQuery = "";
     },
-    setActiveMenuItem: (state, action: PayloadAction<string>) => {
+    highlightActiveMenuItem: (state, action: PayloadAction<string>) => {
       state.activeMenuItem = action.payload;
     },
     setHeaderSearchQuery: (state, action: PayloadAction<string>) => {
@@ -32,7 +32,7 @@ export const headerSlice = createSlice({
 
 export const {
   toggleSearchExpanderVisible,
-  setActiveMenuItem,
+  highlightActiveMenuItem,
   setHeaderSearchQuery,
 } = headerSlice.actions;
 

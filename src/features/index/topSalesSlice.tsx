@@ -19,7 +19,7 @@ const initState: TopSalesState = {
 };
 
 export const loadTopSalesAsync = createAsyncThunk(
-  "catalog/loadTopSalesAsync",
+  "topSales/loadTopSalesAsync",
   async (): Promise<CatalogItem[]> => {
     return await fetch(URL_TOP_SALES)
       .then((r) => r.json())
@@ -33,7 +33,6 @@ export const topSalesSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // top sales
       .addCase(loadTopSalesAsync.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";

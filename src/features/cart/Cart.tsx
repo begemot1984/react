@@ -1,15 +1,100 @@
-import { useEffect } from "react";
-import { useAppDispatch } from "../../app/hooks";
-import { setActiveMenuItem } from "../header/headerSlice";
+import { useEffect, type FormEvent } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { highlightActiveMenuItem } from "../header/headerSlice";
+import { createSelector } from "@reduxjs/toolkit";
+import type { RootState } from "../../app/store";
+import { Link } from "react-router-dom";
+import { PAGE_ITEM } from "../common/constants";
+import {
+  postOrderAsync,
+  removeCartItem,
+  setCustomerAddres,
+  setCustomerAgree,
+  setCustomerPhone,
+  setErrorMessage,
+} from "./cartSlice";
+import { NumericFormat } from "react-number-format";
+import { ErrorMessage } from "../common/ErrorMessage";
+import Preloader from "../common/Preloader";
+import { SuccessMessage } from "../common/SuccessMessage";
 
 export default function Cart() {
-  // TODO: dynamic cart content (state + localStorage)
-  // TODO: <Link to=""></Link> instead of <a href=""></a>
   const dispatch = useAppDispatch();
 
+  const selectState = createSelector(
+    [(state: RootState) => state.cart],
+    (cartState) => {
+      const itemsWithPriceByQuantity = cartState.items.map((i) => {
+        return {
+          ...i,
+          priceByQuantity: i.price * i.quantity, // итого
+        };
+      });
+      let total = 0;
+      itemsWithPriceByQuantity.forEach((i) => (total += i.priceByQuantity));
+      return {
+        ...cartState,
+        items: itemsWithPriceByQuantity,
+        total,
+      };
+    },
+  );
+  const state = useAppSelector((state) => selectState(state));
+
   useEffect(() => {
-    dispatch(setActiveMenuItem(""));
+    dispatch(highlightActiveMenuItem(""));
   });
+
+  function priceFormat(value: number) {
+    return (
+      <NumericFormat
+        value={value}
+        displayType="text"
+        thousandSeparator=" "
+        decimalSeparator="."
+      />
+    );
+  }
+
+  const onSubmitOrder = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
+    let errorMessage = "";
+    if (state.customerPhone.trim() === "") {
+      errorMessage = "Телефон не может быть пустым";
+    }
+
+    if (state.customerAddress.trim() === "") {
+      const addressErrorMessage = "Адрес не может быть пустым";
+      errorMessage =
+        errorMessage.trim() === ""
+          ? addressErrorMessage
+          : errorMessage + `; ${addressErrorMessage}`;
+    }
+
+    if (errorMessage.trim() === "") {
+      dispatch(
+        postOrderAsync(
+          JSON.stringify({
+            owner: {
+              phone: state.customerPhone,
+              address: state.customerAddress,
+            },
+            items: state.items.map((i) => {
+              return {
+                id: i.id,
+                size: i.size, // в задании не было, а наверно должно
+                price: i.price,
+                count: i.quantity,
+              };
+            }),
+          }),
+        ),
+      );
+    } else {
+      dispatch(setErrorMessage(errorMessage));
+    }
+  };
 
   return (
     <>
@@ -28,26 +113,33 @@ export default function Cart() {
             </tr>
           </thead>
           <tbody>
-            {/*<tr>
-              <td scope="row">1</td>
-              <td>
-                <a href="/products/1.html">Босоножки 'MYER'</a>
-              </td>
-              <td>18 US</td>
-              <td>1</td>
-              <td>34 000 руб.</td>
-              <td>34 000 руб.</td>
-              <td>
-                <button className="btn btn-outline-danger btn-sm">
-                  Удалить
-                </button>
-              </td>
-            </tr>*/}
+            {state.items.map((i) => {
+              return (
+                <tr key={i.id}>
+                  <td scope="row">1</td>
+                  <td>
+                    <Link to={PAGE_ITEM(i.id)}>Босоножки 'MYER'</Link>
+                  </td>
+                  <td>{i.size}</td>
+                  <td>{i.quantity}</td>
+                  <td>{priceFormat(i.price)}</td>
+                  <td>{priceFormat(i.priceByQuantity)}</td>
+                  <td>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => dispatch(removeCartItem(i.id))}
+                    >
+                      Удалить
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
             <tr>
               <td colSpan={5} className="text-right">
                 Общая стоимость
               </td>
-              <td>34 000 руб.</td>
+              <td>{priceFormat(state.total)}</td>
             </tr>
           </tbody>
         </table>
@@ -55,13 +147,15 @@ export default function Cart() {
       <section className="order">
         <h2 className="text-center">Оформить заказ</h2>
         <div className="card" style={{ maxWidth: "30rem", margin: "0 auto" }}>
-          <form className="card-body">
+          <form className="card-body" onSubmit={onSubmitOrder}>
             <div className="form-group">
               <label htmlFor="phone">Телефон</label>
               <input
                 className="form-control"
                 id="phone"
                 placeholder="Ваш телефон"
+                value={state.customerPhone}
+                onChange={(evt) => dispatch(setCustomerPhone(evt.target.value))}
               />
             </div>
             <div className="form-group">
@@ -70,6 +164,10 @@ export default function Cart() {
                 className="form-control"
                 id="address"
                 placeholder="Адрес доставки"
+                value={state.customerAddress}
+                onChange={(evt) =>
+                  dispatch(setCustomerAddres(evt.target.value))
+                }
               />
             </div>
             <div className="form-group form-check">
@@ -77,15 +175,30 @@ export default function Cart() {
                 type="checkbox"
                 className="form-check-input"
                 id="agreement"
+                onChange={() =>
+                  dispatch(setCustomerAgree(!state.customerAgree))
+                }
+                checked={state.customerAgree}
               />
               <label className="form-check-label" htmlFor="agreement">
                 Согласен с правилами доставки
               </label>
             </div>
-            <button type="submit" className="btn btn-outline-secondary">
-              Оформить
-            </button>
+            {state.customerAgree &&
+              !state.isPosting &&
+              state.items.length > 0 && (
+                <button type="submit" className="btn btn-outline-secondary">
+                  Оформить
+                </button>
+              )}
           </form>
+          {state.isPosting && <Preloader />}
+          {state.errorMessage.trim() !== "" && (
+            <ErrorMessage msg={state.errorMessage} />
+          )}
+          {state.successMessage.trim() !== "" && (
+            <SuccessMessage msg={state.successMessage} />
+          )}
         </div>
       </section>
     </>

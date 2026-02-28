@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../../app/hooks";
-import { setActiveMenuItem } from "../header/headerSlice";
+import { highlightActiveMenuItem } from "../header/headerSlice";
 
 export default function NotFound() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(setActiveMenuItem(""));
+    dispatch(highlightActiveMenuItem(""));
   });
 
   return (

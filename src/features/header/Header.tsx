@@ -74,7 +74,7 @@ export default function Header() {
           <div className="col">
             <nav className="navbar navbar-expand-sm navbar-light bg-light">
               <Link className="navbar-brand" to={PAGE_INDEX}>
-                <img src="./img/header-logo.png" alt="Bosa Noga" />
+                <img src="/img/header-logo.png" alt="Bosa Noga" />
               </Link>
               <div className="collapse navbar-collapse" id="navbarMain">
                 <ul className="navbar-nav mr-auto">

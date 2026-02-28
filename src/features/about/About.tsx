@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { MENU_ITEM_ABOUT } from "../common/constants";
-import { setActiveMenuItem } from "../header/headerSlice";
+import { highlightActiveMenuItem } from "../header/headerSlice";
 import { useAppDispatch } from "../../app/hooks";
 
 export default function About() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(setActiveMenuItem(MENU_ITEM_ABOUT));
+    dispatch(highlightActiveMenuItem(MENU_ITEM_ABOUT));
   });
 
   return (

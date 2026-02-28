@@ -6,6 +6,10 @@ export const URL_CATALOG = `${URL_ROOT}/items`;
 export const URL_ITEM = (id: number) => `${URL_ROOT}/items/${id}`;
 export const URL_ORDER = `${URL_ROOT}/order`;
 
+export const POST_ORDER_HEADERS = { "Content-Type": "application/json" };
+
+export const METHOD_POST = "POST";
+
 export const PARAM_OFFSET = "offset";
 export const PARAM_QUERY = "q";
 export const PARAM_CATEGORY = "categoryId";
@@ -25,3 +29,8 @@ export const PAGE_CART = "/cart.html";
 export const CATEGORY_ID_ALL = -1;
 
 export const GOODS_BATCH_SIZE = 6;
+
+export const MIN_QUANTITY = 1;
+export const MAX_QUANTITY = 10;
+
+export const LOCAL_STORAGE_KEY_ITEMS = "bosa-noga-items";

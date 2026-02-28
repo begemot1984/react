@@ -8,8 +8,8 @@ export const CatalogItems: FC<CatalogItemsProps> = ({ items }) => {
     <div className="row">
       {items.map((i) => {
         return (
-          <div className="col-4">
-            <div className="card catalog-item-card" key={i.id}>
+          <div className="col-4" key={i.id}>
+            <div className="card catalog-item-card">
               <img
                 src={i.images[0]}
                 className="card-img-top img-fluid"

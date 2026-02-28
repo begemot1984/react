@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { MENU_ITEM_CONTACTS } from "../common/constants";
-import { setActiveMenuItem } from "../header/headerSlice";
+import { highlightActiveMenuItem } from "../header/headerSlice";
 import { useAppDispatch } from "../../app/hooks";
 
 export default function Contacts() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(setActiveMenuItem(MENU_ITEM_CONTACTS));
+    dispatch(highlightActiveMenuItem(MENU_ITEM_CONTACTS));
   });
 
   return (

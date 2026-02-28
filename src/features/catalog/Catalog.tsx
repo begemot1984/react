@@ -14,7 +14,7 @@ import {
   PARAM_OFFSET,
   PARAM_QUERY,
 } from "../common/constants";
-import { setActiveMenuItem } from "../header/headerSlice";
+import { highlightActiveMenuItem } from "../header/headerSlice";
 import Preloader from "../common/Preloader";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { CatalogItems } from "../common/CatalogItems";
@@ -25,7 +25,7 @@ export const Catalog: FC<CatalogProps> = ({ isStandalone }) => {
 
   useEffect(() => {
     if (isStandalone) {
-      dispatch(setActiveMenuItem(MENU_ITEM_CATALOG));
+      dispatch(highlightActiveMenuItem(MENU_ITEM_CATALOG));
     }
   });
 

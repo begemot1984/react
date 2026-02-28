@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit";
 import { catalogReducer } from "../features/catalog/catalogSlice.tsx";
 import { topSalesReducer } from "../features/index/topSalesSlice.tsx";
+import { itemsReducer } from "../features/item/itemSlice.tsx";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     cart: cartReducer,
     catalog: catalogReducer,
     topSales: topSalesReducer,
+    item: itemsReducer,
   },
 });
 

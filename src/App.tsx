@@ -26,7 +26,7 @@ export default function App() {
           <div className="col">
             <div className="banner">
               <img
-                src="./img/banner.jpg"
+                src="/img/banner.jpg"
                 className="img-fluid"
                 alt="К весне готовы!"
               />

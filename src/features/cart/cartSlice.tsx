@@ -21,23 +21,32 @@ export type CartState = {
   successMessage: string;
 };
 
-const initState: CartState = {
-  items: restoreItemsFromLocalStorage(),
+const initState: CartState = restoreItemsFromLocalStorage({
+  items: [],
   customerPhone: "",
   customerAddress: "",
   customerAgree: false,
   isPosting: false,
   errorMessage: "",
   successMessage: "",
-};
+});
 
 function saveItems2LocalStorage(items: CartItem[]): void {
   localStorage.setItem(LOCAL_STORAGE_KEY_ITEMS, JSON.stringify(items));
 }
 
-function restoreItemsFromLocalStorage(): CartItem[] {
+function restoreItemsFromLocalStorage(state: CartState): CartState {
   const value = localStorage.getItem(LOCAL_STORAGE_KEY_ITEMS);
-  return value ? (JSON.parse(value) as CartItem[]) : [];
+  let items = state.items;
+  let errorMessage = state.errorMessage;
+  if (value) {
+    try {
+      items = JSON.parse(value) as CartItem[];
+    } catch (e) {
+      errorMessage = `Ошибка чтения корзины из localStorage: ${e.message}`;
+    }
+  }
+  return { ...state, items, errorMessage };
 }
 
 export const postOrderAsync = createAsyncThunk(
@@ -82,9 +91,12 @@ export const cartSlice = createSlice({
       }
       saveItems2LocalStorage(state.items);
       state.successMessage = "";
+      state.errorMessage = "";
     },
-    removeCartItem: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter((i) => i.id != action.payload);
+    removeCartItem: (state, action: PayloadAction<CartItem>) => {
+      state.items = state.items.filter(
+        (i) => i.id !== action.payload.id || i.size !== action.payload.size,
+      );
       saveItems2LocalStorage(state.items);
     },
     setCustomerPhone: (state, action: PayloadAction<string>) => {

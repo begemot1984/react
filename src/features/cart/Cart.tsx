@@ -60,16 +60,24 @@ export default function Cart() {
     evt.preventDefault();
 
     let errorMessage = "";
+
+    function addErrorMessage(auxErrorMessage: string): void {
+      errorMessage =
+        errorMessage.trim() === ""
+          ? auxErrorMessage
+          : errorMessage + `; ${auxErrorMessage}`;
+    }
+
     if (state.customerPhone.trim() === "") {
-      errorMessage = "Телефон не может быть пустым";
+      addErrorMessage("Телефон не может быть пустым");
     }
 
     if (state.customerAddress.trim() === "") {
-      const addressErrorMessage = "Адрес не может быть пустым";
-      errorMessage =
-        errorMessage.trim() === ""
-          ? addressErrorMessage
-          : errorMessage + `; ${addressErrorMessage}`;
+      addErrorMessage("Адрес не может быть пустым");
+    }
+
+    if (state.items.length === 0) {
+      addErrorMessage("Корзина не может быть пустой");
     }
 
     if (errorMessage.trim() === "") {
@@ -83,7 +91,6 @@ export default function Cart() {
             items: state.items.map((i) => {
               return {
                 id: i.id,
-                size: i.size, // в задании не было, а наверно должно
                 price: i.price,
                 count: i.quantity,
               };
@@ -115,10 +122,10 @@ export default function Cart() {
           <tbody>
             {state.items.map((i) => {
               return (
-                <tr key={i.id}>
-                  <td scope="row">1</td>
+                <tr key={`${i.id}-${i.size}`}>
+                  <td scope="row">{state.items.indexOf(i) + 1}</td>
                   <td>
-                    <Link to={PAGE_ITEM(i.id)}>Босоножки 'MYER'</Link>
+                    <Link to={PAGE_ITEM(i.id)}>{i.title}</Link>
                   </td>
                   <td>{i.size}</td>
                   <td>{i.quantity}</td>
@@ -127,7 +134,7 @@ export default function Cart() {
                   <td>
                     <button
                       className="btn btn-outline-danger btn-sm"
-                      onClick={() => dispatch(removeCartItem(i.id))}
+                      onClick={() => dispatch(removeCartItem(i))}
                     >
                       Удалить
                     </button>

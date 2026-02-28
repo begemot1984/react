@@ -69,8 +69,7 @@ export const Catalog: FC<CatalogProps> = ({ isStandalone }) => {
     );
   };
 
-  const onSearchSubmit = (evt: FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
+  const onSearchClick = () => {
     dispatch(
       setCatalogLoadParams({
         ...state.loadParams,
@@ -79,6 +78,11 @@ export const Catalog: FC<CatalogProps> = ({ isStandalone }) => {
         resetItems: true,
       }),
     );
+  };
+
+  const onSearchSubmit = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onSearchClick();
   };
 
   const onChangeCurrentSearchQuery = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +104,7 @@ export const Catalog: FC<CatalogProps> = ({ isStandalone }) => {
               value={state.currentSearchQuery}
               onChange={onChangeCurrentSearchQuery}
             />
+            <div onClick={onSearchClick} className="form-icon"></div>
           </form>
         )}
         {state.categories.errorMessage.trim() !== "" && (

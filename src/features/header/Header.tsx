@@ -131,7 +131,6 @@ export default function Header() {
                           {state.cartItemCount}
                         </div>
                       )}
-                      <div className="header-controls-cart-menu"></div>
                     </div>
                   </div>
                   <form
